@@ -3,7 +3,7 @@ select * from Purchasing.Suppliers;
 select * from Sales.Customers;
 select * from Sales.Orders;
 
-/*1.	List of Persons¡¯ full name, all their fax and phone numbers, as well as the phone number and fax of the company they are working for (if any). 
+/*1.	List of PersonsÂ¡Â¯ full name, all their fax and phone numbers, as well as the phone number and fax of the company they are working for (if any). 
 select FullName, FaxNumber, PhoneNumber from application.people;*/
 select P.PersonID, FullName, S.ComName as CompanyName, P.PhoneNumber as PersonPhoneNumber, P.FaxNumber as PersonFaxNumber,
 S.PhoneNumber as CompanyPhoneNumber, S.FaxNumber as CompanyFaxNumber
@@ -20,7 +20,7 @@ union
 on P.PersonID = S.PersonID
 order by P.personID;
 
-/*2.	If the customer's primary contact person has the same phone number as the customer¡¯s phone number, list the customer companies;*/
+/*2.	If the customer's primary contact person has the same phone number as the customerÂ¡Â¯s phone number, list the customer companies;*/
 
 select CustomerID, CustomerName as Company, S.PhoneNumber as CusPhone, A.PhoneNumber as ConPhone,
 case when S.PrimaryContactPersonID = A.PersonID 
@@ -53,4 +53,18 @@ select StockItemID, StockItemName
 from warehouse.stockitems
 where len(SearchDetails) >= 10;
 
-/*6.	List of stock items that are not sold to the state of Alabama and Georgia in 2014.*/
+/*6.	List of stock items that are not sold to the state of Alabama and Georgia in 2014.
+select top 10 * from application.StateProvinces; 
+select top 10 * from application.Cities; --CityID, StateProvinceID
+select top 10 * from sales.Customers; --CustomerID, deliveryCityID
+select top 10 * from sales.OrderLines;--OrderID, StockItemID
+select top 10 * from sales.Orders;--OrderID, CustomerIDï¼Œ OrderDate */
+
+select SL.StockItemID from sales.Orders SO join sales.OrderLines SL
+on SO.OrderID = SL.OrderID 
+where SO.CustomerID not in
+(select S.CustomerID from sales.Customers S join application.Cities C 
+on S.DeliveryCityID = C.CityID join application.StateProvinces Sta
+on C.StateProvinceID = Sta.StateProvinceID
+where Sta.StateProvinceName = 'Alabama' or Sta.StateProvinceName = 'Georgia')
+and SO.OrderID like '2014';
