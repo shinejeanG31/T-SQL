@@ -82,14 +82,21 @@ order by StockItemID;
 
 
 
-select  sum(DiscountPercentage*Quantity*UnitPrice/100) Loss
-from
-(select SP.DiscountPercentage, SL.Quantity, SL.UnitPrice
+select Lo.StockItemID, (Lo.Loss/SL2.Profit*100) Loss_Percentage from
+(select StockItemID, sum(DiscountPercentage*Quantity*UnitPrice/10) Loss from
+(select SP.DiscountPercentage, SL.Quantity, SL.StockItemID, SL.UnitPrice
 from sales.OrderLines SL 
 join sales.Orders SO
 on SO.OrderID = SL.OrderID 
 join
 sales.SpecialDeals SP 
 on
-SO.OrderDate between SP.StartDate and SP.EndDate) A;
+SO.OrderDate between SP.StartDate and SP.EndDate) A
+group by StockItemID) Lo
+
+join 
+
+(Select StockItemID, sum(Quantity*UnitPrice) Profit from sales.OrderLines
+group by StockItemID) SL2
+on Lo.StockItemID = SL2.StockItemID;
 
