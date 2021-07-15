@@ -56,7 +56,7 @@ on PP.StockItemID = SS.StockItemID)) A
 where isnull(ImportsAmount, 0) > isnull(SalesAmount,0)
 order by StockItemID;
 
---2th version £¨full join)
+--2th version Â£Â¨full join)
 select P_StockItemID StockItemID, isnull(ImportsAmount, 0)ImportsAmount, isnull(SalesAmount,0)SalesAmount from
 
 (select P.StockItemID P_StockItemID, P.ImportsAmount, S.StockItemID S_StockItemID,SalesAmount from 
@@ -75,14 +75,14 @@ order by StockItemID;
 
 
 
---£¨3£©
+--Â£Â¨3Â£Â©
 --select * from sales.SpecialDeals;--CustomerID, StockItemID, DiscountAmout, DiscountPercentage, UnitPrice,DiscountPercentage
 --select top 10 * from sales.OrderLines;--OrderID, StockItemID, Quantity,StockItemID, UnitPrice
 --select top 10 * from sales.Orders;--OrderID, CustomerID, OrderDate
 
 
 
-select  sum(DiscountPercentage*Quantity*UnitPrice) Loss
+select  sum(DiscountPercentage*Quantity*UnitPrice/100) Loss
 from
 (select SP.DiscountPercentage, SL.Quantity, SL.UnitPrice
 from sales.OrderLines SL 
