@@ -68,3 +68,76 @@ on S.DeliveryCityID = C.CityID join application.StateProvinces Sta
 on C.StateProvinceID = Sta.StateProvinceID
 where Sta.StateProvinceName = 'Alabama' or Sta.StateProvinceName = 'Georgia')
 and SO.OrderID like '2014';
+
+
+/*21.	Create a new table called ods.Orders. Create a stored procedure, with proper error handling and transactions,
+that input is a date; when executed, it would find orders of that day, calculate order total, and save the information 
+(order id, order date, order total, customer id) into the new table. If a given date is already existing in the new table, 
+throw an error and roll back. Execute the stored procedure 5 times using different dates. */
+
+drop table ods.Orders;
+go
+drop schema ods;
+go
+
+Create schema ods;
+go
+
+Create table ods.Orders
+(order_id int,
+order_date datetime,
+order_total int,
+customer_id int
+);
+
+
+if Exists(select name from sysobjects where NAME = 'finddate' and type='P') 
+    drop procedure finddate
+
+
+Create Procedure finddate
+@inputdate datetime
+
+as
+Begin
+
+Set NOCOUNT ON;
+
+Set XACT_ABORT ON;
+
+Begin  Tran
+save tran aaa
+if not Exists (select * from ods.Orders where order_date = @inputdate)
+insert into ods.Orders
+(order_id,order_date,order_total,customer_id)
+select SO.OrderID, SO.OrderDate, T.OrderTotal, SO.CustomerID from sales.Orders SO
+  join (
+  select OrderDate, count(OrderID) OrderTotal from sales.Orders
+  where OrderDate = @inputdate
+  group by OrderDate) T
+  on SO.OrderDate = T.OrderDate
+  where SO.OrderDate = @inputdate
+  order by SO.OrderID;
+select * from ods.Orders;
+
+if @@error<>0 
+begin 
+
+rollback tran aaa 
+
+commit tran ok
+
+end
+
+else 
+
+commit tran ok 
+
+End
+
+
+Exec finddate @inputdate='2013-01-01'
+Exec finddate @inputdate='2017-01-01'
+Exec finddate @inputdate='2016-01-01'
+Exec finddate @inputdate='2014-01-01'
+Exec finddate @inputdate='2015-01-01'
